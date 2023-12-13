@@ -1,0 +1,6 @@
+#ignoramos los archivos temporarios generados por LibreOffice al sabrir un doc
+.~lock.informe.docx#
+
+#ignoramos los tempCodeRunner
+examples/tempCodeRunnerFile.py
+src/tempCodeRunnerFile.py

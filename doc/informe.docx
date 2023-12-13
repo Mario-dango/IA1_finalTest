@@ -1,1 +1,61 @@
-aasdasd
+Trabajo Final Inteligencia Artificial I – año 2022: Visión Artificial
+
+
+Profesora: Dra. Ing. Selva S. Rivera
+Alumno: Mario Stefano Papetti Funes
+Legajo: 11807
+Carrera: Ingeniería en Mecatrónica
+
+
+Resumen, con un máximo de 200 palabras describa el problema a resolver, los algoritmos utilizados, resultados y conclusiones. 
+- Introducción, haga una descripción de lo que es la visión artificial y del problema a resolver. 
+- Especificación del agente ( tipo de agente, tabla REAS y propiedades del entorno de trabajo). 
+- Diseño del agente, describa algoritmos utilizados en cada etapa del agente. 
+- Código, incluya copia del código desarrollado 
+- Ejemplo de aplicación, muestre un ejemplo de cada caso con los resultados obtenidos. 
+- Resultados, describa con especificaciones técnicas los datos utilizados y los datos de prueba. Presente estadísticas de las clasificaciones realizadas. Comente los resultados obtenidos. 
+- Conclusiones, comente conclusiones generales, eficiencia, ventajas y desventajas y trabajos a futuro para posibles mejoras. 
+- Bibliografía y/o referencias utilizadas para realizar el trabajo 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resumen
+Se tiene que conseguir una solución a la problemática planteada acerca del reconocimiento de elementos tales cómo arandelas, tuercas, clavos y tornillos, con el fin de poder clasificar nuevas muestras dentro de estas clases utilizando un agente inteligente (usando los algoritmos Kmeans y Knn) aplicando visión artificial se busca conseguir el objetivo. Además de la identificación y clasificación de nuevas muestras se debe de realizar un reordenamiento de las clases contenedoras aplicando el lenguaje STRIPS
+
+
+
+
