@@ -2,11 +2,16 @@ import cv2
 import numpy as np
 
 #Leo la imagen de diversas figuras
-figuras = cv2.imread("../resources/images/formas.png")
+# figuras = cv2.imread("../resources/images/formas.png")
+figuras = cv2.imread("../resources/pictures/tornillo01.jpeg")
+# figuras = cv2.imread("../resources/dataset/internet/arandela06.jpg")
 #Creo una imagen apartir de una transformación a grices de la imagen original
 grices = cv2.cvtColor(figuras, cv2.COLOR_BGR2GRAY)
 #
-ret,th = cv2.threshold(grices,200,255,cv2.THRESH_BINARY_INV)
+imgCanny = cv2.Canny(figuras, 10, 50)
+
+imgCanny
+ret,th = cv2.threshold(grices,100,255,cv2.THRESH_BINARY_INV)
 #Consigo los contornos ordenandolos en cantidad y por jerarquia
 contornos,jerarquia = cv2.findContours(th,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 #dibujo los contornos
@@ -26,6 +31,7 @@ for conts in range (len(contornos)):
     print(cX);print(cY)
     #Dibujo un punto en donde corresponde la coordenada de su centroide
     cv2.circle(figuras,(cX,cY),5,(130,130,130),-1)
+    
     #Calculo la longitud de curva del contorno
     per = cv2.arcLength(cnt, True)
     #imprimo la longitud de crva del contorno
