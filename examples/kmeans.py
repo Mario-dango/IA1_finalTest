@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 
 #Leo la imagen de diversas figuras
-figuras = cv2.imread("../resources/images/formas1.png")
-# figuras = cv2.imread("../resources/pictures/tornillo01.jpeg")
+# figuras = cv2.imread("../resources/images/formas1.png")
+figuras = cv2.imread("../resources/pictures/tornillo01.jpeg")
 # figuras = cv2.imread("../resources/dataset/internet/arandela06.jpg")
 #Creo una imagen apartir de una transformación a grices de la imagen original
 grices = cv2.cvtColor(figuras, cv2.COLOR_BGR2GRAY)
