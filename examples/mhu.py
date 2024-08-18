@@ -1,6 +1,7 @@
 import cv2 
 import numpy as np
 import matplotlib as plt
+from numpy.fft import fft2, fftshift, ifft2 
 
 # contC = []
 # imgCanny = 0
@@ -8,6 +9,18 @@ import matplotlib as plt
 # imgSobel = 0
 # ContG = []
 # imgGauss = 0
+
+def procesar(imagen): #funcion para procesar la imagen (con filtros)
+    imagen = cv2.resize(imagen, None, fx=0.15, fy=0.15)
+    imagen = cv2.GaussianBlur(imagen, (7,7), 0)
+    imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+    imagen = cv2.Canny(imagen,100, 200)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    imagen = cv2.dilate(imagen, kernel, iterations=1)
+    contornos, jerarquia = cv2.findContours(imagen, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(imagen, contornos, -1, (255,255,255), -1)
+    imagen = cv2.erode(imagen, kernel, iterations=3)
+    return imagen
 
 def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     """
@@ -56,26 +69,27 @@ def getGaussSobel(img):
     _,imgGauss = cv2.threshold(grices, t_lower, t_upper, cv2.THRESH_BINARY_INV)
     #Consigo los contornos ordenandolos en cantidad y por jerarquia
     contG,_ = cv2.findContours(imgGauss, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(f"El valor de contorno de Gauss es: \n {contG}")  
+    # print(f"El valor de contorno de Gauss es: \n {contG}")  
     cv2.imshow("Blur Gauss + Sobel ", imgGauss)
     return imgGauss
 
 ### Filtro Sobel
 def getSobel(img):    
-    img = resize(img, width = 300, height = 300)
-    t_lower = 70  # Lower Threshold 
-    t_upper = 200  # Upper threshold     
-    #Creo una imagen apartir de una transformación a grices de la imagen original
-    grices = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _,imgSobel = cv2.threshold(grices, t_lower, t_upper, cv2.THRESH_BINARY_INV)
-    #Consigo los contornos ordenandolos en cantidad y por jerarquia
-    contS,_ = cv2.findContours(imgSobel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(f"El valor de contorno de Sobel es: \n {contS}")
-    #dibujo los contornos
-    cv2.imshow("Imagen sobel", imgSobel)
-    cv2.drawContours(imagen, contS, 0, (0,255,0),3)
-    cv2.imshow("Imagen sobel Contorneada", imagen)
-    return imgSobel
+    # img = resize(img, width = 300, height = 300)
+    # t_lower = 70  # Lower Threshold 
+    # t_upper = 200  # Upper threshold     
+    # #Creo una imagen apartir de una transformación a grices de la imagen original
+    # grices = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # _,imgSobel = cv2.threshold(grices, t_lower, t_upper, cv2.THRESH_BINARY_INV)
+    # #Consigo los contornos ordenandolos en cantidad y por jerarquia
+    # contS,_ = cv2.findContours(imgSobel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # # print(f"El valor de contorno de Sobel es: \n {contS}")
+    # #dibujo los contornos
+    # cv2.imshow("Imagen sobel", imgSobel)
+    # cv2.drawContours(imagen, contS, 0, (0,255,0),3)
+    # cv2.imshow("Imagen sobel Contorneada", imagen)
+    # return imgSobel
+    pass
 
 ### Canny edge Detection funtion ###
 def getCanny(img):
@@ -85,10 +99,11 @@ def getCanny(img):
     t_upper = 150  # Upper threshold 
     aperture_size = 3  # Aperture size 
     L2Gradient = False # Boolean 
+    img = cv2.GaussianBlur(img, (11,11), 0)
     imgCanny = cv2.Canny(img, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
     # Encuentra los contornos en la imagen filtrada por Canny
     contC,_ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(f"El valor de contorno de Canny es: \n {contC}")
+    # print(f"El valor de contorno de Canny es: \n {contC}")
     cv2.imshow("imagen filtro Canny", imgCanny)
     cv2.drawContours(imgCanny, contC, 0, (255, 255, 255), 3)
     cv2.imshow("imagen filtro Canny c contorno", imgCanny)
@@ -96,15 +111,15 @@ def getCanny(img):
 
 
 #Defino la ruta de la imagen
-pathImage = "../resources/images/formasP.png"
+# pathImage = "../resources/images/formasP.png"
 # pathImage = "../resources/pictures/tornillo01.jpeg"
 # pathImage = "../resources/pictures/tuerca01.jpeg"
-pathImage = "../resources/dataset/internet/arandela06.jpg"
-# pathImage = "../resources/images/formas1.png"
-# pathImage = "../resources/images/tu.png"
-# # pathImage = "../resources/images/ar.png"
-# pathImage = "../resources/dataset/internet/tornillo04.jpg"
-# pathImage = "../resources/dataset/internet/clavo06.jpg"
+# pathImage = "../resources/dataset/internet/arandela06.jpg"
+# # pathImage = "../resources/images/formas1.png"
+# # pathImage = "../resources/images/tu.png"
+# pathImage = "../resources/images/ar.png"
+# # pathImage = "../resources/dataset/internet/tornillo04.jpg"
+pathImage = "../resources/dataset/internet/clavo06.jpg"
 
 
 ###### TUERCA #####
@@ -182,82 +197,88 @@ imgCanny = cv2.Canny(imagen, 130, 220)
 # Encuentra los contornos en la imagen filtrada por Canny
 contC,_ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 contours = contC
+print(type(contours))
+cv2.waitKey(0)
+cv2.dft()
 
-# Calcula los momentos de Hu para el primer contorno encontrado
-for c in range(len(contours)):
-    moments = cv2.moments(contours[c])
-    hu_moments = cv2.HuMoments(moments)
-    print("Hu Moments de la imagen filtrada por Canny:")
-    for i in range(0, 7):
-        print(f"Hu Moment {i}: {hu_moments[i]}")
+# ## prueba de función Lucho
+# procesar(imagen)
 
-#por cada elemento dentro de  la cantidad de contornosdasd
-for conts in range (len(contC)):     
-    #trabajo con el contorno i-ésimo
-    cnt = contC[conts]   
-    #consigo su momento de hu
-    M = cv2.moments(cnt)
-    #muestro su valor
-    # print(M)
-    #Calculo sus coordenadas del centroide en X y en Y
-    if M["m00"] != 0:
-        cX = int (M["m10"]/M["m00"]);cY = int (M["m01"]/M["m00"])
-        #imprimo sus valores
-        # print(cX);print(cY)
-        #Dibujo un punto en donde corresponde la coordenada de su centroide
-        cv2.circle(imagen,(cX,cY),5,(130,130,130),-1)
-    #elipse
-    elip = 0; excentricity = 0
-    if len(contC[conts]) > 5:            
-        elip = cv2.fitEllipse(contC[conts])
-        print("El valor de elipse es: ", elip)
-        # Calcular los ejes mayor y menor de la elipse ajustada
-        major_axis = max(elip[1])
-        minor_axis = min(elip[1])
-        # Calcular la excentricidad
-        excentricity = major_axis / minor_axis
+# # Calcula los momentos de Hu para el primer contorno encontrado
+# for c in range(len(contours)):
+#     moments = cv2.moments(contours[c])
+#     hu_moments = cv2.HuMoments(moments)
+#     print("Hu Moments de la imagen filtrada por Canny:")
+#     for i in range(0, 7):
+#         print(f"Hu Moment {i}: {hu_moments[i]}")
 
-        # Imprimir el valor de excentricidad
-        print("Excentricidad:", excentricity)
+# #por cada elemento dentro de  la cantidad de contornosdasd
+# for conts in range (len(contC)):     
+#     #trabajo con el contorno i-ésimo
+#     cnt = contC[conts]   
+#     #consigo su momento de hu
+#     M = cv2.moments(cnt)
+#     #muestro su valor
+#     # print(M)
+#     #Calculo sus coordenadas del centroide en X y en Y
+#     if M["m00"] != 0:
+#         cX = int (M["m10"]/M["m00"]);cY = int (M["m01"]/M["m00"])
+#         #imprimo sus valores
+#         # print(cX);print(cY)
+#         #Dibujo un punto en donde corresponde la coordenada de su centroide
+#         cv2.circle(imagen,(cX,cY),5,(130,130,130),-1)
+#     #elipse
+#     elip = 0; excentricity = 0
+#     if len(contC[conts]) > 5:            
+#         elip = cv2.fitEllipse(contC[conts])
+#         print("El valor de elipse es: ", elip)
+#         # Calcular los ejes mayor y menor de la elipse ajustada
+#         major_axis = max(elip[1])
+#         minor_axis = min(elip[1])
+#         # Calcular la excentricidad
+#         excentricity = major_axis / minor_axis
+
+#         # Imprimir el valor de excentricidad
+#         print("Excentricidad:", excentricity)
         
     
-    #Calculo la longitud de curva del contorno
-    per = cv2.arcLength(cnt, True)
-    #imprimo la longitud de curva del contorno
-    print(per)
-    #Aproximo las curvas de contorno por medio de rectas
-    approx = cv2.approxPolyDP(cnt, 0.006*per, True)
-    #imprimo 
-    print(approx);print(len(approx))
+#     #Calculo la longitud de curva del contorno
+#     per = cv2.arcLength(cnt, True)
+#     #imprimo la longitud de curva del contorno
+#     print(per)
+#     #Aproximo las curvas de contorno por medio de rectas
+#     approx = cv2.approxPolyDP(cnt, 0.006*per, True)
+#     #imprimo 
+#     print(approx);print(len(approx))
     
     
-    # Calcular la cantidad de lados
-    num_lados = len(approx)
-    longitud = []
-    # Calcular la longitud de cada lado
-    for i in range(num_lados):
-        # Calcular la distancia entre puntos adyacentes para obtener la longitud del lado
-        p1 = tuple(approx[i][0])  # Punto actual
-        p2 = tuple(approx[(i + 1) % num_lados][0])  # Punto siguiente (teniendo en cuenta el contorno cerrado)
+#     # Calcular la cantidad de lados
+#     num_lados = len(approx)
+#     longitud = []
+#     # Calcular la longitud de cada lado
+#     for i in range(num_lados):
+#         # Calcular la distancia entre puntos adyacentes para obtener la longitud del lado
+#         p1 = tuple(approx[i][0])  # Punto actual
+#         p2 = tuple(approx[(i + 1) % num_lados][0])  # Punto siguiente (teniendo en cuenta el contorno cerrado)
 
-        # Calcular la distancia euclidiana entre los puntos
-        longitud_lado = np.linalg.norm(np.array(p2) - np.array(p1))
-        longitud.append(longitud_lado)
-        # Imprimir la longitud de cada lado
-        print(f"Longitud del lado {i + 1}: {longitud_lado}")
+#         # Calcular la distancia euclidiana entre los puntos
+#         longitud_lado = np.linalg.norm(np.array(p2) - np.array(p1))
+#         longitud.append(longitud_lado)
+#         # Imprimir la longitud de cada lado
+#         print(f"Longitud del lado {i + 1}: {longitud_lado}")
 
-    # Imprimir la cantidad de lados
-    print(f"Cantidad de lados: {num_lados}")
-    mediana = np.median(longitud)
-    media = np.mean(longitud)
-    print(f"El valor de mediana es {mediana} y el de media es {media}")
-    print(f"su exentricidad es de {excentricity}")
+#     # Imprimir la cantidad de lados
+#     print(f"Cantidad de lados: {num_lados}")
+#     mediana = np.median(longitud)
+#     media = np.mean(longitud)
+#     print(f"El valor de mediana es {mediana} y el de media es {media}")
+#     print(f"su exentricidad es de {excentricity}")
     
     
-    #Muestro las ventanas de las imagenes
-    # cv2.imshow("Imagen real", imagen);cv2.imshow("th",getSobel(imagen))
-    #Espero presionar una tecla para pasar a la siguiente iteración
-    cv2.waitKey(0)
+#     #Muestro las ventanas de las imagenes
+#     # cv2.imshow("Imagen real", imagen);cv2.imshow("th",getSobel(imagen))
+#     #Espero presionar una tecla para pasar a la siguiente iteración
+#     cv2.waitKey(0)
 
-#limprio las ventanas existentes
-cv2.destroyAllWindows()
+# #limprio las ventanas existentes
+# cv2.destroyAllWindows()
