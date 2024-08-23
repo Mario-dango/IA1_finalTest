@@ -1,39 +1,40 @@
 import cv2
+import numpy as np
 
 #Defino la ruta de la imagen
 # pathImage = "../resources/images/formasP.png"
 pathImage = "../resources/pictures/tornillo01.jpeg"
 # pathImage = "../resources/pictures/tuerca01.jpeg"
 
-pathImage = "../resources/dataset/internet/arandela01.jpg" #No
-pathImage = "../resources/dataset/internet/arandela02.jpg"
-pathImage = "../resources/dataset/internet/arandela03.jpg"
-pathImage = "../resources/dataset/internet/arandela04.jpg"
-pathImage = "../resources/dataset/internet/arandela05.jpg" #No
-pathImage = "../resources/dataset/internet/arandela06.jpg" #No
+pathImage = "../resources/dataset/internet/arandelas/arandela01.jpg" #No
+pathImage = "../resources/dataset/internet/arandelas/arandela02.jpg"
+pathImage = "../resources/dataset/internet/arandelas/arandela03.jpg"
+pathImage = "../resources/dataset/internet/arandelas/arandela04.jpg"
+pathImage = "../resources/dataset/internet/arandelas/arandela05.jpg" #No
+pathImage = "../resources/dataset/internet/arandelas/arandela06.jpg" #No
 
-pathImage = "../resources/dataset/internet/tornillo01.jpg" #No
-pathImage = "../resources/dataset/internet/tornillo02.jpg"
-pathImage = "../resources/dataset/internet/tornillo03.jpg" #No
-pathImage = "../resources/dataset/internet/tornillo04.jpg"
-pathImage = "../resources/dataset/internet/tornillo05.jpg"
-pathImage = "../resources/dataset/internet/tornillo06.jpg" #No
+pathImage = "../resources/dataset/internet/tornillos/tornillo01.jpg" #No
+pathImage = "../resources/dataset/internet/tornillos/tornillo02.jpg"
+pathImage = "../resources/dataset/internet/tornillos/tornillo03.jpg" #No
+pathImage = "../resources/dataset/internet/tornillos/tornillo04.jpg"
+pathImage = "../resources/dataset/internet/tornillos/tornillo05.jpg"
+pathImage = "../resources/dataset/internet/tornillos/tornillo06.jpg" #No
 
-pathImage = "../resources/dataset/internet/tuerca01.jpg"
-pathImage = "../resources/dataset/internet/tuerca02.jpg"
-pathImage = "../resources/dataset/internet/tuerca03.jpg" #No
-pathImage = "../resources/dataset/internet/tuerca04.jpg" #No
-pathImage = "../resources/dataset/internet/tuerca05.jpg"
-pathImage = "../resources/dataset/internet/tuerca06.jpg"
+pathImage = "../resources/dataset/internet/tuercas/tuerca01.jpg"
+pathImage = "../resources/dataset/internet/tuercas/tuerca02.jpg"
+pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No
+pathImage = "../resources/dataset/internet/tuercas/tuerca04.jpg" #No
+# pathImage = "../resources/dataset/internet/tuercas/tuerca05.jpg"
+# pathImage = "../resources/dataset/internet/tuercas/tuerca06.jpg"
 
-pathImage = "../resources/dataset/internet/clavo01.jpg" #No
-pathImage = "../resources/dataset/internet/clavo02.jpg"
-pathImage = "../resources/dataset/internet/clavo03.jpg"
-pathImage = "../resources/dataset/internet/clavo04.jpg" #No
-pathImage = "../resources/dataset/internet/clavo05.jpg" #No
-pathImage = "../resources/dataset/internet/clavo06.jpg"
+# pathImage = "../resources/dataset/internet/clavos/clavo01.jpg" #No
+# pathImage = "../resources/dataset/internet/clavos/clavo02.jpg"
+# pathImage = "../resources/dataset/internet/clavos/clavo03.jpg"
+# pathImage = "../resources/dataset/internet/clavos/clavo04.jpg" #No
+# pathImage = "../resources/dataset/internet/clavos/clavo05.jpg" #No
+# pathImage = "../resources/dataset/internet/clavos/clavo06.jpg"
 
-pathImage = "../resources/images/formas1.png"
+# pathImage = "../resources/images/formas1.png"
 # # pathImage = "../resources/images/tu.png"
 # pathImage = "../resources/images/ar.png"
 
@@ -74,21 +75,39 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 def getCanny(img):
     img = resize(img, width = 300, height = 300)
     # Setting parameter values 
-    t_lower = 80  # Lower Threshold, bajo de este nivel no detecta el contorno.
-    t_upper = 100  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+    t_lower = 50  # Lower Threshold, bajo de este nivel no detecta el contorno.
+    t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+    
+    # t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
+    # t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
     aperture_size = 3  # Aperture size 
     L2Gradient = False # Boolean 
-    img = cv2.GaussianBlur(img, (5,7), 0)
+    img = cv2.GaussianBlur(img, (5,5), 0)
     imgCanny = cv2.Canny(img, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
     # Encuentra los contornos en la imagen filtrada por Canny
     contC,_ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # print(f"El valor de contorno de Canny es: \n {contC}")
-    cv2.imshow("imagen filtro Canny", imgCanny)
-    cv2.drawContours(imgCanny, contC, 0, (255, 255, 255), 3)
-    cv2.imshow("imagen filtro Canny c contorno", imgCanny)
     return imgCanny, contC
 
-
+def mofologicTransform(img, operation,iterations = 1):
+    # Defino la matriz que afectará a los pixeles morfologicamente
+    sizeKernel = np.ones((3,3), np.uint8)
+    if operation == "erosion":
+        # Transformación morfologica de erosión
+        operacion = cv2.erode(img, sizeKernel, iterations)
+    elif operation == "dilatacion":
+        # Transformación morfologica de erosión
+        operacion = cv2.dilate(img, sizeKernel, iterations)
+    elif operation == "opening":
+        # Transformación morfologica de erosión
+        operacion = cv2.morphologyEx(img, cv2.MORPH_OPEN, sizeKernel, iterations)
+    elif operation == "closing":
+        # Transformación morfologica de erosión
+        operacion = cv2.morphologyEx(img, cv2.MORPH_CLOSE, sizeKernel, iterations)
+    else:
+        print("operacion invaldiad")
+        operacion = None
+    return operacion
 
 img = cv2.imread(pathImage)
 imgR = resize(img, 300, 300)
@@ -98,7 +117,11 @@ print("la cantidad de contornos es de:" + str(len(cont)))
 cv2.drawContours(imgR, cont, 0, (0, 255, 47), 3)
 cv2.imshow("Imagen original",imgR)
 
-
+operacionesMorph = mofologicTransform(imgC, "dilatacion")
+cv2.imshow("MORPHOLOGIC OPERATION", operacionesMorph)
+cont,_ = cv2.findContours(operacionesMorph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(operacionesMorph, cont, 0, (255, 0, 255), 3)
+cv2.imshow("imagen filtro Canny c contorno", operacionesMorph)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
