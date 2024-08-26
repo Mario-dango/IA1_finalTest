@@ -8,22 +8,22 @@ pathImage = "../resources/pictures/tornillo01.jpeg"
 
 pathImage = "../resources/dataset/internet/arandelas/arandela01.jpg" #No
 pathImage = "../resources/dataset/internet/arandelas/arandela02.jpg"
-pathImage = "../resources/dataset/internet/arandelas/arandela03.jpg"
-pathImage = "../resources/dataset/internet/arandelas/arandela04.jpg"
-pathImage = "../resources/dataset/internet/arandelas/arandela05.jpg" #No
-pathImage = "../resources/dataset/internet/arandelas/arandela06.jpg" #No
+# pathImage = "../resources/dataset/internet/arandelas/arandela03.jpg"
+# pathImage = "../resources/dataset/internet/arandelas/arandela04.jpg"
+# pathImage = "../resources/dataset/internet/arandelas/arandela05.jpg" #No
+# pathImage = "../resources/dataset/internet/arandelas/arandela06.jpg" #No
 
-pathImage = "../resources/dataset/internet/tornillos/tornillo01.jpg" #No
-pathImage = "../resources/dataset/internet/tornillos/tornillo02.jpg"
-pathImage = "../resources/dataset/internet/tornillos/tornillo03.jpg" #No
-pathImage = "../resources/dataset/internet/tornillos/tornillo04.jpg"
-pathImage = "../resources/dataset/internet/tornillos/tornillo05.jpg"
-pathImage = "../resources/dataset/internet/tornillos/tornillo06.jpg" #No
+# pathImage = "../resources/dataset/internet/tornillos/tornillo01.jpg" #No
+# pathImage = "../resources/dataset/internet/tornillos/tornillo02.jpg"
+# pathImage = "../resources/dataset/internet/tornillos/tornillo03.jpg" #No #!RESUELTO
+# pathImage = "../resources/dataset/internet/tornillos/tornillo04.jpg" #!RESUELTO
+# pathImage = "../resources/dataset/internet/tornillos/tornillo05.jpg" #!problema
+# pathImage = "../resources/dataset/internet/tornillos/tornillo06.jpg" #No #!RESUELTO
 
-pathImage = "../resources/dataset/internet/tuercas/tuerca01.jpg"
-pathImage = "../resources/dataset/internet/tuercas/tuerca02.jpg"
-pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No
-pathImage = "../resources/dataset/internet/tuercas/tuerca04.jpg" #No
+# pathImage = "../resources/dataset/internet/tuercas/tuerca01.jpg"
+# pathImage = "../resources/dataset/internet/tuercas/tuerca02.jpg"
+# pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No #!RESUELTO
+# pathImage = "../resources/dataset/internet/tuercas/tuerca04.jpg" #No #!RESUELTO
 # pathImage = "../resources/dataset/internet/tuercas/tuerca05.jpg"
 # pathImage = "../resources/dataset/internet/tuercas/tuerca06.jpg"
 
@@ -91,7 +91,7 @@ def getCanny(img):
 
 def mofologicTransform(img, operation,iterations = 1):
     # Defino la matriz que afectará a los pixeles morfologicamente
-    sizeKernel = np.ones((3,3), np.uint8)
+    sizeKernel = np.ones((4,4), np.uint8)
     if operation == "erosion":
         # Transformación morfologica de erosión
         operacion = cv2.erode(img, sizeKernel, iterations)
@@ -114,13 +114,16 @@ imgR = resize(img, 300, 300)
 imgC, cont = getCanny(img)
 print(type(cont))
 print("la cantidad de contornos es de:" + str(len(cont)))
-cv2.drawContours(imgR, cont, 0, (0, 255, 47), 3)
-cv2.imshow("Imagen original",imgR)
+# cv2.drawContours(imgR, cont, 0, (0, 255, 47), 3)
+# cv2.imshow("Imagen original",imgR)
 
+# revisar contorno exterior cerrado.
 operacionesMorph = mofologicTransform(imgC, "dilatacion")
 cv2.imshow("MORPHOLOGIC OPERATION", operacionesMorph)
 cont,_ = cv2.findContours(operacionesMorph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cv2.drawContours(operacionesMorph, cont, 0, (255, 0, 255), 3)
+cv2.drawContours(imgR, cont, 0, (0, 255, 47), 3)
+cv2.imshow("Imagen original",imgR)
 cv2.imshow("imagen filtro Canny c contorno", operacionesMorph)
 
 cv2.waitKey(0)
