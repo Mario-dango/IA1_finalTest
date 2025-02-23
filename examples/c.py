@@ -21,22 +21,26 @@ pathImage = "../resources/dataset/internet/arandelas/arandela02.jpg"
 # pathImage = "../resources/dataset/internet/tornillos/tornillo06.jpg" #No #!RESUELTO
 
 # pathImage = "../resources/dataset/internet/tuercas/tuerca01.jpg"
-# pathImage = "../resources/dataset/internet/tuercas/tuerca02.jpg"
-# pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No #!RESUELTO
-# pathImage = "../resources/dataset/internet/tuercas/tuerca04.jpg" #No #!RESUELTO
-# pathImage = "../resources/dataset/internet/tuercas/tuerca05.jpg"
-# pathImage = "../resources/dataset/internet/tuercas/tuerca06.jpg"
+pathImage = "../resources/dataset/internet/tuercas/tuerca02.jpg" #?RES
+pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No #!RESUELTO
+# pathImage = "../resources/dataset/internet/tuercas/tuerca04.jpg" #No #!RESUELTO Tuerca en perspectiva
+# pathImage = "../resources/dataset/internet/tuercas/tuerca05.jpg"   #! tuerca en perspectiva
+# pathImage = "../resources/dataset/internet/tuercas/tuerca06.jpg"    #! tuerca en perspectiva
 
 # pathImage = "../resources/dataset/internet/clavos/clavo01.jpg" #No
-# pathImage = "../resources/dataset/internet/clavos/clavo02.jpg"
+# pathImage = "../resources/dataset/internet/clavos/clavo02.jpg"  #? solve
 # pathImage = "../resources/dataset/internet/clavos/clavo03.jpg"
 # pathImage = "../resources/dataset/internet/clavos/clavo04.jpg" #No
 # pathImage = "../resources/dataset/internet/clavos/clavo05.jpg" #No
 # pathImage = "../resources/dataset/internet/clavos/clavo06.jpg"
 
 # pathImage = "../resources/images/formas1.png"
-# # pathImage = "../resources/images/tu.png"
+# pathImage = "../resources/images/tu.png"
 # pathImage = "../resources/images/ar.png"
+
+pathImage = "../app/resources/dataset/photos/clavos/a.jpg"
+pathImage = "../app/resources/dataset/photos/tornillos/1.jpg"
+
 
 def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     """
@@ -70,28 +74,27 @@ def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     # resultado.
     return cv2.resize(image, new_size, interpolation=inter)
 
-
 ### Canny edge Detection funtion ###
 def getCanny(img):
     img = resize(img, width = 300, height = 300)
-    # Setting parameter values 
-    t_lower = 50  # Lower Threshold, bajo de este nivel no detecta el contorno.
-    t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+    # # Setting parameter values 
+    # t_lower = 50  # Lower Threshold, bajo de este nivel no detecta el contorno.
+    # t_upper = 160  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
     
-    # t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
-    # t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+    t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
+    t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
     aperture_size = 3  # Aperture size 
     L2Gradient = False # Boolean 
     img = cv2.GaussianBlur(img, (5,5), 0)
     imgCanny = cv2.Canny(img, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
     # Encuentra los contornos en la imagen filtrada por Canny
     contC,_ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # print(f"El valor de contorno de Canny es: \n {contC}")
+    print(f"El valor de contorno de Canny es: \n {contC}")
     return imgCanny, contC
 
-def mofologicTransform(img, operation,iterations = 1):
+def mofologicTransform(img, operation,iterations = 2):
     # Defino la matriz que afectará a los pixeles morfologicamente
-    sizeKernel = np.ones((4,4), np.uint8)
+    sizeKernel = np.ones((4,3), np.uint8)
     if operation == "erosion":
         # Transformación morfologica de erosión
         operacion = cv2.erode(img, sizeKernel, iterations)
@@ -128,4 +131,32 @@ cv2.imshow("imagen filtro Canny c contorno", operacionesMorph)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+
+
+# ⠄⠄⠄⠄⠄⠄⢀⠠⣐⡴⣴⡴⣵⢾⢾⢾⢾⣞⢞⢞⣚⢞⢬⢰⠠
+# ⠄⠄⡀⠠⣀⣬⡾⡋⠉⡉⢹⣽⢯⣟⣟⡿⣽⢾⣻⢾⣜⡘⠎⠇
+# ⠄⡱⢶⡯⣷⣗⣯⢛⣿⣿⣿⣿⣿⣽⣗⡿⡯⠿⢽⣻⣞⡿⣦⡡⠄
+# ⡀⣶⣻⡽⣗⣿⠞⣈⡋⡉⢿⣿⡿⣹⣿⣽⣤⣐⠄⠱⣯⢿⣽⣻⢌⠄
+# ⢮⢷⣻⡽⢋⢤⢞⡵⣜⢞⠆⣠⣾⣿⣿⣺⣗⢯⡷⣄⣿⣻⢾⣽⡺⡌⠄
+# ⢮⡚⡎⢡⣞⢵⡫⣞⢎⣗⡅⣿⣻⣟⣾⣳⢷⡯⣾⢽⢾⣽⣻⣺⢧⢻⡌
+# ⡈⠎⢠⡳⡱⢳⡹⣜⠵⡱⡅⢺⣺⣗⣿⣺⡯⣿⢽⡯⣿⣺⣗⣯⢳⡱⡵
+# ⠄⠄⡎⣂⠪⡐⢕⢐⢅⢃⠫⡄⢳⢝⢾⣳⢿⢽⢯⣟⣷⢻⣞⡧⡳⡕⢝⢆
+# ⠄⠄⡇⡢⢣⠱⡡⢣⠪⡸⡨⠲⡈⡏⣞⢼⢝⡯⣻⣺⢳⡳⡵⣝⢵⠡⢣⢣
+# ⠄⠄⢱⢘⢌⢎⢎⢎⢎⢎⢜⢌⢆⠘⡼⡕⡯⡺⣕⢗⣝⢞⢮⣪⠇⢕⠡⣫
+# ⣈⣐⠈⣎⢪⢪⣪⡺⣜⣮⡧⡣⡓⠄⢎⠊⡋⠺⡪⣳⡱⡝⣮⠋⢈⠢⠣⡻
+# ⣿⣿⣷⡌⠪⣪⢲⢵⡹⣪⣺⠘⢁⢨⣴⣿⣿⣶⣌⠐⣀⠑⠁⠄⠄⠈⠐
+
+# ⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⡛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+# ⣿⣿⡿⠿⢿⣿⣿⡿⠏⣼⣿⣷⣌⠻⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿
+# ⣿⣿⢰⣿⣶⣌⣥⣶⣿⣿⡟⠻⢛⢷⣦⡍⠹⠋⡴⣲⡲⡌⢿⣿
+# ⣿⡇⣾⣿⡿⡛⢻⣿⣿⣿⣇⠩⠤⣹⣿⡿⢋⣼⣯⣤⣼⡷⢸⣿
+# ⢛⣣⣿⣿⡌⠀⡁⢸⢿⣦⣻⣿⣿⣿⣿⣡⣿⣿⣿⣿⣿⡇⣾⣿
+# ⡖⢹⣿⣿⣿⣶⣾⣿⣿⣷⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢰⣿⣿
+# ⡥⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢿⣿⣿
+# ⣷⡈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢠⣿⣿
+# ⣿⣷⠘⣿⣿⣿⣿⣿⡟⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⣿⣿
+# ⣿⡧⢈⣿⣿⣿⣿⣿⣿⡎⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠨⣿
+# ⣿⡇⣹⣿⣿⣿⣿⣿⣿⣿⢘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠘
+# ⡟⢰⣿⣿⣿⣿⣦⣍⣉⣥⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆
 
