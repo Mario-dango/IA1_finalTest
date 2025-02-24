@@ -12,6 +12,7 @@ class ImageModel:
          - Primer momento de Hu (hu0)
         """        
         imagen_filtrada = self.filtrado(imagen)
+        cv2.imshow("img_filtrada",imagen_filtrada)
         # Buscar contornos
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contornos:
@@ -49,12 +50,11 @@ class ImageModel:
     def generar_imagen_contorno(self, imagen_cv):
         # Obtener la imagen con bordes/umbrales
         imagen_filtrada = self.filtrado(imagen_cv)
-        
         # Buscar contornos
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         # Copiar la imagen original para dibujar sobre ella
-        contorno_img = imagen_cv.copy()
+        contorno_img = self.resize(imagen_cv.copy(), 400, 400)
         
         if contornos:
             # Seleccionar el contorno de mayor área
@@ -99,13 +99,14 @@ class ImageModel:
 
     def filtrado(self, img):
         # Opcional: redimensionar (ajusta según tu caso)
-        # img = self.resize(img, width=400, height=400)
+        img = self.resize(img, width=400, height=400)
         
         # Convertir a escala de grises
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)        
+        cv2.imshow("img_gris",gray)
         # Aplicar un filtro de mediana o bilateral
-        gray = cv2.medianBlur(gray, 5)
+        gray = cv2.medianBlur(gray, 5)       
+        cv2.imshow("img_grisBlur",gray)
         # gray = cv2.bilateralFilter(gray, 9, 75, 75)
         
         # Umbralizar la imagen (Otsu o adaptativo) para resaltar el objeto
@@ -114,7 +115,8 @@ class ImageModel:
         thresh = cv2.adaptiveThreshold(
             gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv2.THRESH_BINARY_INV, 51, 5
-        )
+        )       
+        cv2.imshow("img_thresh",thresh)
         
         # Operaciones morfológicas
         kernel = np.ones((5, 5), np.uint8)
@@ -125,9 +127,11 @@ class ImageModel:
         lower = int(max(0, (1.0 - 0.33) * median_val))
         upper = int(min(255, (1.0 + 0.33) * median_val))
         edges = cv2.Canny(thresh, lower, upper)
+        cv2.imshow("img_Canny",edges)
         
         # Cierre final si hace falta
         edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2)
+        cv2.imshow("img_morphClos",edges)
         
         return edges
 
