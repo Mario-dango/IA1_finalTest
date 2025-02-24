@@ -45,38 +45,38 @@ class Modelo(object):
          - Primer momento de Hu (hu0)
         Se utiliza un preprocesamiento para evitar que la sombra se detecte como borde.
         """
-        # # Convertir a escala de grises
-        # gray = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        # # Suavizado para reducir ruido y sombras
-        # blur = cv2.GaussianBlur(gray, (7, 7), 0)
-        # # Threshold adaptativo
-        # # Parámetros ajustados
-        # blockSize = 25  # Tamaño de la ventana (debe ser impar)
-        # C = 5           # Constante para ajustar el umbral
+        # Convertir a escala de grises
+        gray = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+        # Suavizado para reducir ruido y sombras
+        blur = cv2.GaussianBlur(gray, (7, 7), 0)
+        # Threshold adaptativo
+        # Parámetros ajustados
+        blockSize = 25  # Tamaño de la ventana (debe ser impar)
+        C = 5           # Constante para ajustar el umbral
 
-        # # Umbralización adaptativa
-        # thresh = cv2.adaptiveThreshold(
-        #     blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, blockSize, C
-        # )
+        # Umbralización adaptativa
+        thresh = cv2.adaptiveThreshold(
+            blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, blockSize, C
+        )
 
-        # # Operación morfológica de cierre para eliminar pequeños huecos
-        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))  # Tamaño del kernel
-        # closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-        # # Buscar contornos
-        # contornos, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Operación morfológica de cierre para eliminar pequeños huecos
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))  # Tamaño del kernel
+        closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        # Buscar contornos
+        contornos, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
 
-        gray = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
-        t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
-        aperture_size = 3  # Aperture size 
-        L2Gradient = False # Boolean 
-        img = cv2.GaussianBlur(gray, (5,5), 0)
-        sizeKernel = np.ones((4,3), np.uint8); iterations=2
-        morpho=cv2.dilate(img, sizeKernel, iterations)
-        imga = cv2.Canny(morpho, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
+        # gray = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+        # t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
+        # t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+        # aperture_size = 3  # Aperture size 
+        # L2Gradient = False # Boolean 
+        # img = cv2.GaussianBlur(gray, (5,5), 0)
+        # sizeKernel = np.ones((4,3), np.uint8); iterations=2
+        # morpho=cv2.dilate(img, sizeKernel, iterations)
+        # imga = cv2.Canny(morpho, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
         # Encuentra los contornos en la imagen filtrada por Canny
-        contornos,_ = cv2.findContours(imga, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # contornos,_ = cv2.findContours(imga, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         if not contornos:
             return 0, 0, 0, 0
@@ -476,26 +476,26 @@ class Controlador:
         self.vista.set_prediccion(mensaje)
 
     def generar_imagen_contorno(self, imagen_cv):
-        # gray = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2GRAY)
-        # blur = cv2.GaussianBlur(gray, (5,5), 0)
-        # thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        #                                cv2.THRESH_BINARY_INV, 11, 2)
-        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-        # closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
-        # contornos, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        gray = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5,5), 0)
+        thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                       cv2.THRESH_BINARY_INV, 11, 2)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+        closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
+        contornos, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contorno_img = imagen_cv.copy()
 
-        gray = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2GRAY)
-        t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
-        t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
-        aperture_size = 3  # Aperture size 
-        L2Gradient = False # Boolean 
-        img = cv2.GaussianBlur(gray, (5,5), 0)
-        sizeKernel = np.ones((4,3), np.uint8); iterations=2
-        morpho=cv2.dilate(img, sizeKernel, iterations)
-        imga = cv2.Canny(morpho, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
-        # Encuentra los contornos en la imagen filtrada por Canny
-        contornos,_ = cv2.findContours(imga, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # gray = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2GRAY)
+        # t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
+        # t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+        # aperture_size = 3  # Aperture size 
+        # L2Gradient = False # Boolean 
+        # img = cv2.GaussianBlur(gray, (5,5), 0)
+        # sizeKernel = np.ones((4,3), np.uint8); iterations=2
+        # morpho=cv2.dilate(img, sizeKernel, iterations)
+        # imga = cv2.Canny(morpho, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
+        # # Encuentra los contornos en la imagen filtrada por Canny
+        # contornos,_ = cv2.findContours(imga, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         cv2.drawContours(contorno_img, contornos, -1, (0, 255, 0), 2)
         return contorno_img

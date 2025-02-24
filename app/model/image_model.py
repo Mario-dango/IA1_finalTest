@@ -10,21 +10,7 @@ class ImageModel:
          - Aspect Ratio
          - Excentricidad (calculada pero no usada en la clasificación 3D)
          - Primer momento de Hu (hu0)
-        """
-        # # Convertir a escala de grises
-        # gray = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        # # Suavizado para reducir ruido y sombras
-        # blur = cv2.GaussianBlur(gray, (7, 7), 0)
-        # # Threshold adaptativo
-        # blockSize = 21  # Tamaño de la ventana (debe ser impar)
-        # C = 5           # Constante para ajustar el umbral
-        # thresh = cv2.adaptiveThreshold(
-        #     blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, blockSize, C
-        # )
-        # # Operación morfológica de cierre para eliminar pequeños huecos
-        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        # closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-        
+        """        
         imagen_filtrada = self.filtrado(imagen)
         # Buscar contornos
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -61,21 +47,23 @@ class ImageModel:
         return circularidad, aspect_ratio, excentricidad, hu0
 
     def generar_imagen_contorno(self, imagen_cv):
-        """
-        Genera una imagen con los contornos resaltados.
-        """
-        # gray = cv2.cvtColor(imagen_cv, cv2.COLOR_BGR2GRAY)
-        # blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        # thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        #                                cv2.THRESH_BINARY_INV, 11, 2)
-        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        # closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
-
+        # Obtener la imagen con bordes/umbrales
         imagen_filtrada = self.filtrado(imagen_cv)
+        
+        # Buscar contornos
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Copiar la imagen original para dibujar sobre ella
         contorno_img = imagen_cv.copy()
-        cv2.drawContours(contorno_img, contornos, 0, (0, 255, 47), 3)
+        
+        if contornos:
+            # Seleccionar el contorno de mayor área
+            contorno_principal = max(contornos, key=cv2.contourArea)
+            cv2.drawContours(contorno_img, [contorno_principal], -1, (0, 255, 0), 2)
+        
         return contorno_img
+
+
     
     def resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
         """
@@ -109,27 +97,46 @@ class ImageModel:
         # resultado.
         return cv2.resize(image, new_size, interpolation=inter)
 
-    ### Canny edge Detection funtion ###
     def filtrado(self, img):
-        img = self.resize(img, width = 300, height = 300)
-        # # Setting parameter values 
-        # t_lower = 50  # Lower Threshold, bajo de este nivel no detecta el contorno.
-        # t_upper = 160  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
+        # Opcional: redimensionar (ajusta según tu caso)
+        # img = self.resize(img, width=400, height=400)
         
-        t_lower = 100  # Lower Threshold, bajo de este nivel no detecta el contorno.
-        t_upper = 200  # Upper threshold, entre lower y upper se dibuja solo si el contorno conecta con uno de valor mayor a upper
-        aperture_size = 3  # Aperture size 
-        L2Gradient = False # Boolean 
-        img_gauss = cv2.GaussianBlur(img, (5,5), 0)
-        imgCanny = cv2.Canny(img_gauss, t_lower, t_upper, apertureSize = aperture_size,  L2gradient = L2Gradient)
-        # Encuentra los contornos en la imagen filtrada por Canny
-        contC,_ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        print(f"\nEl valor de contorno de Canny es: \n {contC}")
-        return imgCanny
+        # Convertir a escala de grises
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Aplicar un filtro de mediana o bilateral
+        gray = cv2.medianBlur(gray, 5)
+        # gray = cv2.bilateralFilter(gray, 9, 75, 75)
+        
+        # Umbralizar la imagen (Otsu o adaptativo) para resaltar el objeto
+        # ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        # -o- adaptativo:
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV, 51, 5
+        )
+        
+        # Operaciones morfológicas
+        kernel = np.ones((5, 5), np.uint8)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        
+        # Canny (con umbrales adaptados a la mediana)
+        median_val = np.median(gray)
+        lower = int(max(0, (1.0 - 0.33) * median_val))
+        upper = int(min(255, (1.0 + 0.33) * median_val))
+        edges = cv2.Canny(thresh, lower, upper)
+        
+        # Cierre final si hace falta
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2)
+        
+        return edges
+
+
 
     def mofologicTransform(self, img, operation,iterations = 2):
         # Defino la matriz que afectará a los pixeles morfologicamente
         sizeKernel = np.ones((4,3), np.uint8)
+        iterations = 1
         if operation == "erosion":
             # Transformación morfologica de erosión
             operacion = cv2.erode(img, sizeKernel, iterations)

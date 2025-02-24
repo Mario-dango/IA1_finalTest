@@ -13,6 +13,8 @@ class Grafico3DCanvas(FigureCanvas):
         self.axes = fig.add_subplot(111, projection='3d')
         super().__init__(fig)
         self.setParent(parent)
+        # Conectar el evento de scroll
+        self.mpl_connect("scroll_event", self.on_scroll)
 
     def plot_puntos(self, datos, centroides=None, asignaciones=None, titulo="Gráfico 3D"):
         """
@@ -62,4 +64,39 @@ class Grafico3DCanvas(FigureCanvas):
                 borderaxespad=0.
             )
 
+        self.draw()
+
+
+    def on_scroll(self, event):
+        """Callback para manejar el zoom con la rueda del mouse."""
+        base_scale = 1.1  # Factor de zoom
+        # Obtener el rango actual de los ejes
+        x_left, x_right = self.axes.get_xlim3d()
+        y_left, y_right = self.axes.get_ylim3d()
+        z_left, z_right = self.axes.get_zlim3d()
+        
+        x_range = x_right - x_left
+        y_range = y_right - y_left
+        z_range = z_right - z_left
+
+        # Si el scroll es hacia arriba, se hace zoom in; si es hacia abajo, zoom out
+        if event.button == 'up':
+            scale_factor = 1 / base_scale
+        elif event.button == 'down':
+            scale_factor = base_scale
+        else:
+            scale_factor = 1
+
+        # Calcular nuevos límites centrados en el punto medio
+        x_mid = (x_left + x_right) * 0.5
+        y_mid = (y_left + y_right) * 0.5
+        z_mid = (z_left + z_right) * 0.5
+
+        new_x_range = x_range * scale_factor
+        new_y_range = y_range * scale_factor
+        new_z_range = z_range * scale_factor
+
+        self.axes.set_xlim3d([x_mid - new_x_range/2, x_mid + new_x_range/2])
+        self.axes.set_ylim3d([y_mid - new_y_range/2, y_mid + new_y_range/2])
+        self.axes.set_zlim3d([z_mid - new_z_range/2, z_mid + new_z_range/2])
         self.draw()

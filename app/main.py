@@ -56,26 +56,13 @@ if __name__ == "__main__":
 # │
 # ├── controller/
 # │   ├── __init__.py
-# │   ├── main_controller.py        # Controlador principal (conexión entre vista y modelo)
-# │   ├── image_controller.py       # Controlador para manejar la lógica de imágenes 
-# │   ├── database_controller.py    # Controlador para manejar la base de datos de imagenes 
-# │   └── prediction_controller.py  # Controlador para manejar la predicción
+# │   └── main_controller.py        # Controlador principal (conexión entre vista y modelo)
 # │
 # ├── resource/
 # │   ├── dataset/                # Carpeta con imágenes para la base de datos
-# │   │   ├── internet/
-# │   │   │   ├── arandelas
-# │   │   │   ├── clavos
-# │   │   │   ├── tornillos
-# │   │   │   └── tuercas
-# │   │   └── photos/
-# │   │       ├── arandelas
-# │   │       ├── clavos
-# │   │       ├── tornillos
-# │   │       └── tuercas
-# │   ├── img1.jpg
-# │   ├── img2.jpg
-# │   ├── img3.jpg
-# │   └── img4.jpg
+# │   │   ├── arandelas
+# │   │   ├── clavos
+# │   │   ├── tornillos
+# │   │   └── tuercas
 # │
 # └── main.py                     # Punto de entrada de la aplicación

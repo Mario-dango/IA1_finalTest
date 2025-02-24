@@ -38,8 +38,8 @@ pathImage = "../resources/dataset/internet/tuercas/tuerca03.jpg" #No #!RESUELTO
 # pathImage = "../resources/images/tu.png"
 # pathImage = "../resources/images/ar.png"
 
-pathImage = "../app/resources/dataset/photos/clavos/a.jpg"
-pathImage = "../app/resources/dataset/photos/tornillos/1.jpg"
+pathImage = "../app/images/ds/clavos/a.jpg"
+pathImage = "../app/images/ds/tornillos/1.jpg"
 
 
 def resize(image, width=None, height=None, inter=cv2.INTER_AREA):
@@ -124,8 +124,8 @@ print("la cantidad de contornos es de:" + str(len(cont)))
 operacionesMorph = mofologicTransform(imgC, "dilatacion")
 cv2.imshow("MORPHOLOGIC OPERATION", operacionesMorph)
 cont,_ = cv2.findContours(operacionesMorph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(operacionesMorph, cont, 0, (255, 0, 255), 3)
-cv2.drawContours(imgR, cont, 0, (0, 255, 47), 3)
+cv2.drawContours(operacionesMorph, cont,  -1, (0, 255, 0), 2)
+cv2.drawContours(imgR, cont,  -1, (0, 255, 0), 2)
 cv2.imshow("Imagen original",imgR)
 cv2.imshow("imagen filtro Canny c contorno", operacionesMorph)
 
