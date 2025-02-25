@@ -1,27 +1,28 @@
-import sys
-from PyQt5.QtWidgets import QApplication
-from model.image_model import ImageModel
-from model.database_model import DatabaseModel
-from model.prediction_model import PredictionModel
-from view.main_window import MainWindow
-from controller.main_controller import MainController
+import sys                                 # Importa el módulo sys para gestionar argumentos y la salida del programa
+from PyQt5.QtWidgets import QApplication    # Importa QApplication, necesaria para inicializar la aplicación PyQt
+from model.image_model import ImageModel      # Importa el modelo para procesamiento de imágenes
+from model.database_model import DatabaseModel  # Importa el modelo que gestiona la base de datos de imágenes
+from model.prediction_model import PredictionModel  # Importa el modelo para clasificación (KNN y K-means)
+from view.main_window import MainWindow       # Importa la ventana principal (vista)
+from controller.main_controller import MainController  # Importa el controlador principal
 
 def main():
     """
-    Punto de entrada de la aplicación.
+    Función principal que inicializa y ejecuta la aplicación.
     """
-    # Inicializar la aplicación PyQt
+    # Inicializa la aplicación PyQt
     app = QApplication(sys.argv)
-
-    # Inicializar los modelos
+    
+    # Inicializa los modelos necesarios
     image_model = ImageModel()
     database_model = DatabaseModel()
-    prediction_model = PredictionModel(database_model)  # Pasar database_model a PredictionModel
+    # Se pasa el modelo de base de datos a PredictionModel para la normalización, etc.
+    prediction_model = PredictionModel(database_model)
 
-    # Inicializar la vista
+    # Inicializa la vista (ventana principal)
     vista = MainWindow()
 
-    # Inicializar el controlador
+    # Inicializa el controlador, pasando un diccionario con los modelos y la vista
     controlador = MainController(
         modelo={
             "image": image_model,
@@ -31,14 +32,16 @@ def main():
         vista=vista
     )
 
-    # Mostrar la ventana principal
+    # Muestra la ventana principal
     vista.show()
 
-    # Ejecutar la aplicación
+    # Ejecuta el ciclo de eventos de la aplicación y finaliza cuando se cierra la ventana
     sys.exit(app.exec_())
 
+# Punto de entrada: si este script se ejecuta directamente, se llama a main()
 if __name__ == "__main__":
     main()
+
     
 # app/
 # │

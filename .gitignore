@@ -4,3 +4,4 @@
 #ignoramos los tempCodeRunner
 examples/tempCodeRunnerFile.py
 src/tempCodeRunnerFile.py
+__pycache__
