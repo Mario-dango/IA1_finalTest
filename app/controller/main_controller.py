@@ -99,35 +99,66 @@ class MainController:
                 )
         else:
             self.vista.agregar_a_registro("No se seleccionó carpeta para el dataset.")
-
     def procesar_imagen(self):
         """
-        Procesa la imagen cargada:
-          - Extrae las características (circularidad, aspect ratio, etc.) utilizando ImageModel.
-          - Genera y muestra la imagen con el contorno dibujado.
-          - Realiza la clasificación con el algoritmo k-NN.
-          - Actualiza la predicción en la vista.
+        Procesa la imagen:
+          - Extrae características (usando ImageModel).
+          - Genera y muestra la imagen con el contorno.
+          - Realiza clasificación con k-NN y K-means.
+          - Actualiza el área de registro y la etiqueta de predicción con ambos resultados.
         """
-        # Verifica que se haya cargado una imagen previamente
         if not hasattr(self, 'imagen_actual') or self.imagen_actual is None:
             self.vista.agregar_a_registro("No hay imagen para procesar. Carga una primero.")
             return
 
-        # Extrae las características de la imagen
+        # Extraer características de la imagen (circularidad, aspect ratio, etc.)
         circ, asp, exc, hu0 = self.modelo["image"].calcular_caracteristicas(self.imagen_actual)
-        # Registra las características extraídas en el área de registro
         self.vista.agregar_a_registro(
-            f"Características extraídas -> Circularidad: {circ:.3f}, Aspect Ratio: {asp:.3f}, "
-            f"Excentricidad: {exc:.3f}, Hu[0]: {hu0:.6f}"
+            f"Características extraídas -> Circularidad: {circ:.3f}, "
+            f"Aspect Ratio: {asp:.3f}, Excentricidad: {exc:.3f}, Hu[0]: {hu0:.6f}"
         )
-        # Genera la imagen con el contorno dibujado y la muestra en la vista (pestaña "Detección")
+
+        # Generar imagen con el contorno dibujado y mostrarla en la pestaña "Detección"
         contorno_img = self.modelo["image"].generar_imagen_contorno(self.imagen_actual)
         self.vista.mostrar_imagen(contorno_img, self.vista.label_contorno)
-        # Clasifica la imagen usando k-NN (se utiliza un vector con 3 características)
-        etiqueta_knn = self.modelo["prediction"].knn_manual([circ, asp, hu0])
-        self.vista.agregar_a_registro(f"KNN dice que es: {etiqueta_knn}")
-        # Actualiza la etiqueta de predicción en la vista
-        self.vista.set_prediccion(etiqueta_knn)
+
+        # Clasificación k-NN:
+        knn_pred = self.modelo["prediction"].knn_manual([circ, asp, hu0])
+        self.vista.agregar_a_registro(f"k-NN predice: {knn_pred}")
+
+        # Clasificación K-means:
+        # Se copia el dataset de entrenamiento y se añade el nuevo punto (con etiqueta "Desconocido")
+        datos_con_nuevo = self.modelo["database"].datos_entrenamiento.copy()
+        datos_con_nuevo.append([circ, asp, hu0, "Desconocido"])
+        # Se extraen las 3 primeras características para K-means
+        datos_3d = [fila[:3] for fila in datos_con_nuevo]
+        # Se ejecuta K-means; se retorna asignaciones para cada punto
+        _, asignaciones = self.modelo["prediction"].kmeans_manual(datos_3d, k=4, max_iter=20)
+        cluster_nuevo = asignaciones[-1]  # Cluster al que pertenece el nuevo punto
+
+        # Se mapea cada cluster a la etiqueta mayoritaria (excluyendo "Desconocido")
+        cluster_mapping = {}
+        clusters = np.unique(asignaciones[:-1])  # Se consideran solo las muestras de entrenamiento
+        for cl in clusters:
+            etiquetas = [datos_con_nuevo[i][3] for i in range(len(asignaciones)-1) if asignaciones[i] == cl]
+            if etiquetas:
+                # La etiqueta mayoritaria en el cluster se asigna como la predicción del cluster
+                cluster_mapping[cl] = max(set(etiquetas), key=etiquetas.count)
+        kmeans_pred = cluster_mapping.get(cluster_nuevo, "Desconocido")
+        self.vista.agregar_a_registro(f"K-means predice: {kmeans_pred}")
+
+        # Actualiza el gráfico K-means para visualizar el nuevo punto y los clusters
+        centroides_unnorm = self.modelo["prediction"].get_centroids_unnorm()
+        self.vista.grafico_kmeans.plot_puntos(
+            datos_con_nuevo,
+            centroides=centroides_unnorm,
+            asignaciones=asignaciones,
+            titulo="K-means (con nuevo punto)"
+        )
+
+        # Actualiza la etiqueta de predicción combinando ambos resultados
+        mensaje = f"k-NN: {knn_pred} | K-means: {kmeans_pred}"
+        self.vista.set_prediccion(mensaje)
 
     def ejecutar_astar(self):
         """

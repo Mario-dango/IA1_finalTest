@@ -35,18 +35,32 @@ class MainWindow(QMainWindow):
         self.layout_tab_deteccion.setRowStretch(0, 1)     # Configura la distribución vertical
         self.layout_tab_deteccion.setRowStretch(1, 1)
         
+        # Se crea un QVBoxLayout para la imagen original, que incluirá un título y el widget de imagen
+        vbox_foto = QVBoxLayout()
+        label_foto_titulo = QLabel("Imagen Original")
+        label_foto_titulo.setAlignment(Qt.AlignCenter)
+        vbox_foto.addWidget(label_foto_titulo)
         # Se crea un ZoomableImageLabel para mostrar la imagen original con funcionalidad de zoom
         self.label_imagen = ZoomableImageLabel()
         self.label_imagen.setFixedSize(300, 300)      # Fija el tamaño del widget
         self.label_imagen.setStyleSheet("background-color: lightgray;")  # Define un fondo gris claro
+        vbox_foto.addWidget(self.label_imagen, alignment=Qt.AlignCenter)
+        
+        # Se crea otro QVBoxLayout para la imagen con contorno, con su título correspondiente
+        vbox_contorno = QVBoxLayout()
+        label_contorno_titulo = QLabel("Imagen con Contorno")
+        label_contorno_titulo.setAlignment(Qt.AlignCenter)
+        vbox_contorno.addWidget(label_contorno_titulo)
         # Se crea otro ZoomableImageLabel para mostrar la imagen con contorno dibujado
         self.label_contorno = ZoomableImageLabel()
         self.label_contorno.setFixedSize(300, 300)
         self.label_contorno.setStyleSheet("background-color: lightgray;")
-        # Se añaden los labels al layout, centrados en cada celda
-        self.layout_tab_deteccion.addWidget(self.label_imagen, 0, 0, alignment=Qt.AlignCenter)
-        self.layout_tab_deteccion.addWidget(self.label_contorno, 0, 1, alignment=Qt.AlignCenter)
+        vbox_contorno.addWidget(self.label_contorno, alignment=Qt.AlignCenter)
 
+        # Se añaden los layouts verticales al layout en forma de grid (fila 0)
+        self.layout_tab_deteccion.addLayout(vbox_foto, 0, 0, alignment=Qt.AlignCenter)
+        self.layout_tab_deteccion.addLayout(vbox_contorno, 0, 1, alignment=Qt.AlignCenter)
+        
         # Se crean dos canvas para gráficos 3D: uno para KNN y otro para K-means
         # Cada canvas se coloca en un layout vertical junto con un QLabel que actúa de título
         vbox_knn = QVBoxLayout()
