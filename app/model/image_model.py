@@ -23,30 +23,32 @@ class ImageModel:
         perimetro = cv2.arcLength(contorno, True)
         circularidad = 4 * math.pi * (area / (perimetro * perimetro)) if perimetro != 0 else 0
 
-        x, y, w, h = cv2.boundingRect(contorno)
-        aspect_ratio = w / float(h) if h != 0 else 0
+        # x, y, w, h = cv2.boundingRect(contorno)
+        # aspect_ratio = w / float(h) if h != 0 else 0
 
-        # Calcular excentricidad mediante fitEllipse
-        excentricidad = 0
-        if len(contorno) >= 5:
-            (x_elipse, y_elipse), (eje1, eje2), angulo = cv2.fitEllipse(contorno)
-            major = max(eje1, eje2)
-            minor = min(eje1, eje2)
-            if major != 0:
-                ratio = (minor / major)**2
-                if ratio > 1:
-                    ratio = 1
-                excentricidad = math.sqrt(1 - ratio)
-            else:
-                excentricidad = 0
+        # # Calcular excentricidad mediante fitEllipse
+        # excentricidad = 0
+        # if len(contorno) >= 5:
+        #     (x_elipse, y_elipse), (eje1, eje2), angulo = cv2.fitEllipse(contorno)
+        #     major = max(eje1, eje2)
+        #     minor = min(eje1, eje2)
+        #     if major != 0:
+        #         ratio = (minor / major)**2
+        #         if ratio > 1:
+        #             ratio = 1
+        #         excentricidad = math.sqrt(1 - ratio)
+        #     else:
+        #         excentricidad = 0
 
         # Primer momento de Hu
         momentos = cv2.moments(contorno)
         hu = cv2.HuMoments(momentos)
-        hu0 = -1 if hu is None else hu[0][0]
+        # hu0 = -1 if hu is None else hu[0][0]
+        hu0 = -1 if hu is None else -np.sign(hu[0][0]) * np.log10(abs(hu[0][0]))
+        hu1 = -1 if hu is None else -np.sign(hu[1][0]) * np.log10(abs(hu[1][0]))
+        hu6 = -1 if hu is None else -np.sign(hu[6][0]) * np.log10(abs(hu[6][0]))
         
-        return circularidad, aspect_ratio, excentricidad, hu0
-
+        return circularidad, hu1, hu6, hu0
     def generar_imagen_contorno(self, imagen_cv):
         # Obtener la imagen con bordes/umbrales
         imagen_filtrada = self.filtrado(imagen_cv)

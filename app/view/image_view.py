@@ -33,8 +33,8 @@ class Grafico3DCanvas(FigureCanvas):
         """
         self.axes.clear()                              # Limpia el eje para una nueva gráfica
         self.axes.set_title(titulo)                      # Establece el título
-        self.axes.set_xlabel("Circularidad")             # Etiqueta para el eje X
-        self.axes.set_ylabel("Aspect Ratio")             # Etiqueta para el eje Y
+        self.axes.set_xlabel("Hu[6]")             # Etiqueta para el eje X
+        self.axes.set_ylabel("Hu[1]")             # Etiqueta para el eje Y
         self.axes.set_zlabel("Hu[0]")                     # Etiqueta para el eje Z
 
         if asignaciones is not None:
