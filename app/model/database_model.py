@@ -34,10 +34,10 @@ class DatabaseModel:
                         imagen = cv2.imread(ruta_img)  # Lee la imagen usando OpenCV
                         if imagen is not None:
                             # Calcula las características de la imagen con ImageModel
-                            circ, asp, exc, hu0 = self.image_model.calcular_caracteristicas(imagen)
+                            h0, solidity, circularity = self.image_model.calcular_caracteristicas(imagen)
                             # Solo se añaden imágenes válidas (al menos una característica distinta de cero)
-                            if circ != 0 or asp != 0:
-                                self.datos_entrenamiento.append([circ, asp, hu0, subfolder])
+                            if h0 != 0 or solidity != 0 or circularity != 0:
+                                self.datos_entrenamiento.append([h0, solidity, circularity, subfolder])
 
         # Una vez cargado el dataset, actualiza la normalización
         self.actualizar_normalizacion()

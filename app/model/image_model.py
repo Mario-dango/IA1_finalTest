@@ -5,47 +5,71 @@ import numpy as np
 class ImageModel:
     def calcular_caracteristicas(self, imagen):
         """
-        Dada una imagen (BGR), retorna:
-         - Circularidad
-         - Aspect Ratio
-         - Excentricidad (calculada pero no usada en la clasificación 3D)
-         - Primer momento de Hu (hu0)
+        Dada una imagen (BGR), retorna los 3 momentos de Hu principales (h0, h1, h6)
+        transformados para una mejor escala.
         """        
         imagen_filtrada = self.filtrado(imagen)
-        # cv2.imshow("img_filtrada",imagen_filtrada)
-        # Buscar contornos
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if not contornos:
-            return 0, 0, 0, 0
         
+        if not contornos:
+            return 0, 0, 0
+
         contorno = max(contornos, key=cv2.contourArea)
-        area = cv2.contourArea(contorno)
-        perimetro = cv2.arcLength(contorno, True)
-        circularidad = 4 * math.pi * (area / (perimetro * perimetro)) if perimetro != 0 else 0
 
-        x, y, w, h = cv2.boundingRect(contorno)
-        aspect_ratio = w / float(h) if h != 0 else 0
-
-        # Calcular excentricidad mediante fitEllipse
-        excentricidad = 0
-        if len(contorno) >= 5:
-            (x_elipse, y_elipse), (eje1, eje2), angulo = cv2.fitEllipse(contorno)
-            major = max(eje1, eje2)
-            minor = min(eje1, eje2)
-            if major != 0:
-                ratio = (minor / major)**2
-                if ratio > 1:
-                    ratio = 1
-                excentricidad = math.sqrt(1 - ratio)
-            else:
-                excentricidad = 0
-
-        # Primer momento de Hu
+        # Calcular los 7 momentos de Hu
         momentos = cv2.moments(contorno)
         hu = cv2.HuMoments(momentos)
-        hu0 = -1 if hu is None else hu[0][0]
+
+        # Función para transformar los momentos de Hu, evitando valores de 0.
+        def transformar_hu(valor):
+            if valor == 0:
+                return 0.0
+            return -np.sign(valor) * np.log10(abs(valor))
+
+        # Extraer y transformar h0, h1 y h6.
+        hu0 = transformar_hu(hu[0][0])
+        # hu1 = transformar_hu(hu[1][0])
+        # hu6 = transformar_hu(hu[6][0])
+
+        # 'contour' es el contorno del objeto que estás analizando
+        area = cv2.contourArea(contorno)
+        hull = cv2.convexHull(contorno)
+        hull_area = cv2.contourArea(hull)
+
+        # Evitar división por cero
+        if hull_area > 0:
+            solidity = float(area) / hull_area
+        else:
+            solidity = 0
+        # Si la solidez es mayor a 0.95 es probable que sea un clavo
         
-        return circularidad, aspect_ratio, excentricidad, hu0
+        # 'contour' es el contorno del objeto
+        perimeter = cv2.arcLength(contorno, True)
+        area = cv2.contourArea(contorno)
+
+        # Evitar división por cero
+        if perimeter > 0:
+            circularity = (4 * np.pi * area) / (perimeter**2)
+        else:
+            circularity = 0
+
+        # Resumen de la Estrategia de Clasificación
+        # Con estas tres características, tu árbol de decisión para clasificar sería:
+
+        # Calcular h0:
+        # Si h0 es alto (objeto redondo): Pasa al paso 2.
+        # Si h0 es bajo (objeto alargado): Pasa al paso 3.
+
+        # Calcular Circularidad (circularity):
+        # Si circularity > 0.9 (aprox.): Es una Arandela.
+        # Si circularity < 0.9 (aprox.): Es una Tuerca.
+
+        # Calcular Solidez (solidity):
+        # Si solidity > 0.95 (aprox.): Es un Clavo.
+        # Si solidity < 0.95 (aprox.): Es un Tornillo.
+
+        
+        return hu0, solidity, circularity
 
     def generar_imagen_contorno(self, imagen_cv):
         # Obtener la imagen con bordes/umbrales
@@ -54,7 +78,7 @@ class ImageModel:
         contornos, _ = cv2.findContours(imagen_filtrada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         # Copiar la imagen original para dibujar sobre ella
-        contorno_img = self.resize(imagen_cv.copy(), 400, 400)
+        contorno_img = self.resize(imagen_cv.copy(), 512, 512)
         
         if contornos:
             # Seleccionar el contorno de mayor área
@@ -99,7 +123,7 @@ class ImageModel:
 
     def filtrado(self, img):
         # Opcional: redimensionar (ajusta según tu caso)
-        img = self.resize(img, width=400, height=400)
+        img = self.resize(img, width=512, height=512)
         
         # Convertir a escala de grises
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)        

@@ -54,7 +54,7 @@ class MainController:
         La imagen se lee con OpenCV y se muestra en la vista en el área correspondiente.
         """
         # Abre un diálogo para seleccionar una imagen con las extensiones indicadas
-        ruta, _ = QFileDialog.getOpenFileName(None, "Seleccionar imagen", "", "Images (*.png *.jpg *.bmp)")
+        ruta, _ = QFileDialog.getOpenFileName(None, "Seleccionar imagen", "", "Images (*.png *.jpg *.jpeg *.bmp)")
         if ruta:
             self.imagen_actual = cv2.imread(ruta)  # Lee la imagen en formato BGR
             if self.imagen_actual is not None:
@@ -80,11 +80,12 @@ class MainController:
             self.vista.agregar_a_registro(f"Dataset cargado desde: {ruta} con {cantidad} muestras.")
             if self.modelo["database"].datos_entrenamiento:
                 # Actualiza el gráfico KNN sin asignaciones (simple dispersión)
+                # Asume que datos_entrenamiento ahora tiene el formato [h0, solidity, circularity, etiqueta]
                 self.vista.grafico_knn.plot_puntos(
                     self.modelo["database"].datos_entrenamiento,
                     titulo="Dataset (KNN)"
                 )
-                # Prepara los datos para K-means: toma las 3 primeras características de cada muestra
+                # Prepara los datos para K-means: toma las 3 características de cada muestra
                 datos_3d = [fila[:3] for fila in self.modelo["database"].datos_entrenamiento]
                 # Ejecuta K-means de forma manual
                 _, asignaciones = self.modelo["prediction"].kmeans_manual(datos_3d, k=4, max_iter=10)
@@ -99,10 +100,11 @@ class MainController:
                 )
         else:
             self.vista.agregar_a_registro("No se seleccionó carpeta para el dataset.")
+            
     def procesar_imagen(self):
         """
         Procesa la imagen:
-          - Extrae características (usando ImageModel).
+          - Extrae características (Momentos de Hu h0, solidity, circularity).
           - Genera y muestra la imagen con el contorno.
           - Realiza clasificación con k-NN y K-means.
           - Actualiza el área de registro y la etiqueta de predicción con ambos resultados.
@@ -111,26 +113,26 @@ class MainController:
             self.vista.agregar_a_registro("No hay imagen para procesar. Carga una primero.")
             return
 
-        # Extraer características de la imagen (circularidad, aspect ratio, etc.)
-        circ, asp, exc, hu0 = self.modelo["image"].calcular_caracteristicas(self.imagen_actual)
+        # 1. Extraer las 3 características de Momentos de Hu
+        h0, solidity, circularity = self.modelo["image"].calcular_caracteristicas(self.imagen_actual)
         self.vista.agregar_a_registro(
-            f"Características extraídas -> Circularidad: {circ:.3f}, "
-            f"Aspect Ratio: {asp:.3f}, Excentricidad: {exc:.3f}, Hu[0]: {hu0:.6f}"
+            f"Características extraídas -> Hu[0]: {h0:.6f}, Solidez: {solidity:.6f}, Circularidad: {circularity:.6f}"
         )
 
         # Generar imagen con el contorno dibujado y mostrarla en la pestaña "Detección"
         contorno_img = self.modelo["image"].generar_imagen_contorno(self.imagen_actual)
         self.vista.mostrar_imagen(contorno_img, self.vista.label_contorno)
 
-        # Clasificación k-NN:
-        knn_pred = self.modelo["prediction"].knn_manual([circ, asp, hu0])
+        # 2. Clasificación k-NN con las 3 nuevas características
+        knn_pred = self.modelo["prediction"].knn_manual([h0, solidity, circularity])
         self.vista.agregar_a_registro(f"k-NN predice: {knn_pred}")
 
-        # Clasificación K-means:
-        # Se copia el dataset de entrenamiento y se añade el nuevo punto (con etiqueta "Desconocido")
+        # 3. Clasificación K-means con las 3 nuevas características
+        # Se copia el dataset de entrenamiento y se añade el nuevo punto
         datos_con_nuevo = self.modelo["database"].datos_entrenamiento.copy()
-        datos_con_nuevo.append([circ, asp, hu0, "Desconocido"])
-        # Se extraen las 3 primeras características para K-means
+        datos_con_nuevo.append([h0, solidity, circularity, "Desconocido"])
+        
+        # Se extraen las 3 características para K-means
         datos_3d = [fila[:3] for fila in datos_con_nuevo]
         # Se ejecuta K-means; se retorna asignaciones para cada punto
         _, asignaciones = self.modelo["prediction"].kmeans_manual(datos_3d, k=4, max_iter=20)
@@ -138,8 +140,10 @@ class MainController:
 
         # Se mapea cada cluster a la etiqueta mayoritaria (excluyendo "Desconocido")
         cluster_mapping = {}
-        clusters = np.unique(asignaciones[:-1])  # Se consideran solo las muestras de entrenamiento
+        # Se consideran solo las muestras de entrenamiento
+        clusters = np.unique(asignaciones[:-1])
         for cl in clusters:
+            # La etiqueta está ahora en la posición 3
             etiquetas = [datos_con_nuevo[i][3] for i in range(len(asignaciones)-1) if asignaciones[i] == cl]
             if etiquetas:
                 # La etiqueta mayoritaria en el cluster se asigna como la predicción del cluster
