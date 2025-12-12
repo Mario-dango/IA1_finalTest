@@ -12,9 +12,15 @@ class AStarModel:
         self.grid = grid      # Guarda el grid (si se pasa alguno)
         self.rows = 0         # Inicializa el número de filas a 0
         self.cols = 0         # Inicializa el número de columnas a 0
+        self.costs = None     # Inicializa la matriz de costos
+        self.heuristic_mods = None  # Inicializa la matriz de modificadores de heurística
         if grid:              # Si se proporciona un grid...
             self.rows = len(grid)         # Asigna el número de filas
             self.cols = len(grid[0])      # Asigna el número de columnas (se asume que todas las filas tienen la misma longitud)
+            # Inicializa la matriz de costos con 1 para cada celda
+            self.costs = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+            # Inicializa la matriz de modificadores de heurística con 0 para cada celda
+            self.heuristic_mods = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
 
     def set_grid(self, grid):
         """
@@ -24,6 +30,8 @@ class AStarModel:
         self.grid = grid
         self.rows = len(grid)
         self.cols = len(grid[0])
+        self.costs = [[1 for _ in range(self.cols)] for _ in range(self.rows)]
+        self.heuristic_mods = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
 
     def heuristic(self, a, b):
         """
@@ -34,7 +42,8 @@ class AStarModel:
         """
         (x1, y1) = a   # Extrae las coordenadas del nodo a
         (x2, y2) = b   # Extrae las coordenadas del nodo b
-        return abs(x1 - x2) + abs(y1 - y2)  # Suma de las diferencias absolutas
+        # Suma de las diferencias absolutas más el modificador de heurística
+        return abs(x1 - x2) + abs(y1 - y2) + self.heuristic_mods[x1][y1]
 
     def get_neighbors(self, node):
         """
@@ -52,6 +61,35 @@ class AStarModel:
                 if self.grid[nx][ny] == 0:  # Si la celda es transitable (0)
                     neighbors.append((nx, ny))  # Agrega el vecino a la lista
         return neighbors
+
+    def set_cost(self, row, col, cost):
+        """
+        Establece el costo de una celda específica.
+        :param row: Fila de la celda.
+        :param col: Columna de la celda.
+        :param cost: El nuevo costo a asignar.
+        """
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            self.costs[row][col] = cost
+
+    def set_heuristic_mod(self, row, col, value):
+        """
+        Establece el modificador de heurística de una celda específica.
+        :param row: Fila de la celda.
+        :param col: Columna de la celda.
+        :param value: El nuevo valor a asignar.
+        """
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            self.heuristic_mods[row][col] = value
+
+    def reset(self):
+        """
+        Restablece los costos y modificadores de heurística a sus valores por defecto.
+        """
+        for r in range(self.rows):
+            for c in range(self.cols):
+                self.costs[r][c] = 1
+                self.heuristic_mods[r][c] = 0
 
     def astar_search(self, start, goal):
         """
@@ -75,7 +113,8 @@ class AStarModel:
 
             # Itera por cada vecino del nodo actual
             for neighbor in self.get_neighbors(current):
-                tentative_g = g_score[current] + 1  # Costo tentativo al vecino (cada movimiento cuesta 1)
+                # Costo tentativo al vecino (costo del vecino)
+                tentative_g = g_score[current] + self.costs[neighbor[0]][neighbor[1]]
                 if neighbor not in g_score or tentative_g < g_score[neighbor]:
                     came_from[neighbor] = current  # Registra que para llegar a 'neighbor' se pasó por 'current'
                     g_score[neighbor] = tentative_g  # Actualiza el costo real para 'neighbor'

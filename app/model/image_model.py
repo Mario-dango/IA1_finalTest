@@ -151,33 +151,10 @@ class ImageModel:
         lower = int(max(0, (1.0 - 0.33) * median_val))
         upper = int(min(255, (1.0 + 0.33) * median_val))
         edges = cv2.Canny(thresh, lower, upper)
-        # cv2.imshow("img_Canny",edges)
+        cv2.imshow("img_Canny",edges)
         
         # Cierre final si hace falta
         edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel, iterations=2)
         # cv2.imshow("img_morphClos",edges)
         
         return edges
-
-
-
-    def mofologicTransform(self, img, operation,iterations = 2):
-        # Defino la matriz que afectará a los pixeles morfologicamente
-        sizeKernel = np.ones((4,3), np.uint8)
-        iterations = 1
-        if operation == "erosion":
-            # Transformación morfologica de erosión
-            operacion = cv2.erode(img, sizeKernel, iterations)
-        elif operation == "dilatacion":
-            # Transformación morfologica de erosión
-            operacion = cv2.dilate(img, sizeKernel, iterations)
-        elif operation == "opening":
-            # Transformación morfologica de erosión
-            operacion = cv2.morphologyEx(img, cv2.MORPH_OPEN, sizeKernel, iterations)
-        elif operation == "closing":
-            # Transformación morfologica de erosión
-            operacion = cv2.morphologyEx(img, cv2.MORPH_CLOSE, sizeKernel, iterations)
-        else:
-            print("operacion invaldiad")
-            operacion = None
-        return operacion
